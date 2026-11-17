@@ -7,42 +7,51 @@ import 'package:rebsspace/core/network/api_client.dart';
 import 'package:rebsspace/core/services/location_services.dart';
 import 'package:rebsspace/features/attendance/data/datasource/attendance_remote_datasource.dart';
 import 'package:rebsspace/features/attendance/presentation/controllers/attendance_controllers.dart';
+import 'package:rebsspace/features/attendance/presentation/screen_attendance.dart';
+import 'package:rebsspace/features/dashboard/presentation/controllers/dashboard_controllor.dart';
 import 'package:rebsspace/features/dashboard/presentation/dashboard.dart';
 import 'package:rebsspace/features/leave/data/datasources/leave_local_data_source.dart';
 import 'package:rebsspace/features/leave/data/datasources/leave_remote_data_source.dart';
 import 'package:rebsspace/features/leave/presentation/controllers/leave_controller.dart';
 import 'package:rebsspace/features/leave/presentation/leave_screen.dart';
-import 'package:rebsspace/features/attendance/presentation/screen_attendance.dart';
 
-void main() {
+void main()async {
   WidgetsFlutterBinding.ensureInitialized();
+await AppDatabase.instance.clearDemoData();
 
   final apiClient = ApiClient();
+  final database = AppDatabase.instance;
 
+  // ATTENDANCE CONTROLLER
   Get.put<AttendanceController>(
     AttendanceController(
       remoteDataSource: AttendanceRemoteDataSource(apiClient),
       locationService: LocationService(),
-      database: AppDatabase.instance,
+      database: database,
     ),
     permanent: true,
   );
 
-final database = AppDatabase.instance;
-
-
-
-Get.put<LeaveController>(
-  LeaveController(
-    remoteDataSource: LeaveRemoteDataSource(
+  // DASHBOARD CONTROLLER
+  Get.put<DashboardController>(
+    DashboardController(
       apiClient: apiClient,
     ),
-    localDataSource: LeaveLocalDataSource(
-      database: database,
+    permanent: true,
+  );
+
+  // LEAVE CONTROLLER
+  Get.put<LeaveController>(
+    LeaveController(
+      remoteDataSource: LeaveRemoteDataSource(
+        apiClient: apiClient,
+      ),
+      localDataSource: LeaveLocalDataSource(
+        database: database,
+      ),
     ),
-  ),
-  permanent: true,
-);
+    permanent: true,
+  );
 
   runApp(const MyApp());
 }
@@ -84,7 +93,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int selectedIndex = 0;
 
-  final List<Widget> screens =  [
+  final List<Widget> screens = [
     DashboardScreen(),
     AttendanceScreen(),
     LeaveScreen(),

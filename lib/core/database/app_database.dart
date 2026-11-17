@@ -191,11 +191,17 @@ class AppDatabase {
     );
   }
 
-  Future<void> cacheAttendance(
-    List<Map<String, dynamic>> records,
-  ) async {
-    final db = await database;
-    final batch = db.batch();
+
+Future<void> cacheAttendance(
+  List<Map<String, dynamic>> records,
+) async {
+  final db = await database;
+
+  await db.transaction((txn) async {
+    // Replace the complete server snapshot.
+    await txn.delete('attendance_cache');
+
+    final batch = txn.batch();
 
     for (final record in records) {
       batch.insert(
@@ -206,7 +212,9 @@ class AppDatabase {
     }
 
     await batch.commit(noResult: true);
-  }
+  });
+}
+
 
   Future<List<Map<String, dynamic>>> getCachedAttendance() async {
     final db = await database;
@@ -281,4 +289,19 @@ class AppDatabase {
       orderBy: 'createdAt DESC',
     );
   }
+
+
+  // ---------------- RESET TEST DATA ----------------
+
+  Future<void> clearDemoData() async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      await txn.delete('attendance_events');
+      await txn.delete('attendance_cache');
+      await txn.delete('leave_balance_cache');
+      await txn.delete('leave_requests_cache');
+    });
+  }
+
 }

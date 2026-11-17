@@ -14,7 +14,7 @@ class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
 
   final DashboardController dashboardController =
-      Get.put(DashboardController());
+      Get.find<DashboardController>();
 
   final AttendanceController attendanceController =
       Get.find<AttendanceController>();
@@ -22,35 +22,27 @@ class DashboardScreen extends StatelessWidget {
   final LeaveController leaveController =
       Get.find<LeaveController>();
 
-  // --------------------------------------------------
   // FORMAT TIME
-  // --------------------------------------------------
+  String formatTime(String? value) {
+    if (value == null || value.isEmpty) {
+      return '--:--';
+    }
 
-String formatTime(String? value) {
-  if (value == null || value.isEmpty) {
-    return '--:--';
+    final date = DateTime.tryParse(value);
+
+    if (date != null) {
+      return DateFormat('hh:mm a').format(date.toLocal());
+    }
+
+    try {
+      final parsedTime = DateFormat('HH:mm').parseStrict(value);
+      return DateFormat('hh:mm a').format(parsedTime);
+    } catch (_) {
+      return value;
+    }
   }
 
-  // Handle ISO timestamp
-  final date = DateTime.tryParse(value);
-
-  if (date != null) {
-    return DateFormat('hh:mm a').format(date.toLocal());
-  }
-
-  // Handle time-only format such as 11:50
-  try {
-    final parsedTime = DateFormat('HH:mm').parseStrict(value);
-    return DateFormat('hh:mm a').format(parsedTime);
-  } catch (_) {
-    return value;
-  }
-}
-
-  // --------------------------------------------------
   // FORMAT DATE
-  // --------------------------------------------------
-
   String formatDate(String value) {
     final date = DateTime.tryParse(value);
 
@@ -61,10 +53,7 @@ String formatTime(String? value) {
     return DateFormat('dd MMM yyyy').format(date);
   }
 
-  // --------------------------------------------------
   // STATUS COLOR
-  // --------------------------------------------------
-
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'present':
@@ -86,10 +75,6 @@ String formatTime(String? value) {
     }
   }
 
-  // --------------------------------------------------
-  // BUILD
-  // --------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,11 +94,6 @@ String formatTime(String? value) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                // ======================================
-                // HEADER
-                // ======================================
-
                 const Text(
                   'Dashboard',
                   style: TextStyle(
@@ -124,10 +104,7 @@ String formatTime(String? value) {
 
                 const SizedBox(height: 20),
 
-                // ======================================
                 // EMPLOYEE DETAILS
-                // ======================================
-
                 Obx(() {
                   if (dashboardController.isLoading.value) {
                     return const Center(
@@ -160,7 +137,6 @@ String formatTime(String? value) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         Text(
                           'Welcome, ${employee.employeeName}',
                           style: const TextStyle(
@@ -170,8 +146,6 @@ String formatTime(String? value) {
                         ),
 
                         const SizedBox(height: 16),
-
-
 
                         Row(
                           children: [
@@ -197,10 +171,7 @@ String formatTime(String? value) {
 
                 const SizedBox(height: 24),
 
-                // ======================================
                 // TODAY'S ATTENDANCE
-                // ======================================
-
                 const SectionTitle(
                   title: "Today's Attendance",
                 ),
@@ -215,7 +186,6 @@ String formatTime(String? value) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
@@ -311,10 +281,7 @@ String formatTime(String? value) {
 
                 const SizedBox(height: 24),
 
-                // ======================================
                 // LEAVE BALANCE
-                // ======================================
-
                 const SectionTitle(
                   title: 'Leave Balance',
                 ),
@@ -333,7 +300,6 @@ String formatTime(String? value) {
                   return AppCard(
                     child: Column(
                       children: [
-
                         Row(
                           children: [
                             Expanded(
@@ -385,10 +351,7 @@ String formatTime(String? value) {
 
                 const SizedBox(height: 24),
 
-                // ======================================
                 // RECENT ATTENDANCE
-                // ======================================
-
                 const SectionTitle(
                   title: 'Recent Attendance',
                 ),
@@ -430,7 +393,6 @@ String formatTime(String? value) {
                           ),
                           child: Row(
                             children: [
-
                               Expanded(
                                 flex: 3,
                                 child: Column(
@@ -492,10 +454,7 @@ String formatTime(String? value) {
   }
 }
 
-// ==================================================
 // ATTENDANCE TIME ITEM
-// ==================================================
-
 class _AttendanceTimeItem extends StatelessWidget {
   final String title;
   final String time;
@@ -532,10 +491,7 @@ class _AttendanceTimeItem extends StatelessWidget {
   }
 }
 
-// ==================================================
 // LEAVE BALANCE ITEM
-// ==================================================
-
 class _LeaveBalanceItem extends StatelessWidget {
   final String title;
   final int days;

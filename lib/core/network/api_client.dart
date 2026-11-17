@@ -7,7 +7,7 @@ class ApiClient {
   ApiClient() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://127.0.0.1:3000',
+        baseUrl: 'https://rebs-hrms-mock-api-tjg0.onrender.com',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {

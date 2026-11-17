@@ -1,11 +1,17 @@
 
 import 'package:get/get.dart';
 import 'package:rebsspace/core/database/app_database.dart';
+import 'package:rebsspace/core/network/api_client.dart';
 import 'package:rebsspace/features/dashboard/data/datasourses/employee_remote_datasourse.dart';
 import 'package:rebsspace/features/dashboard/data/models/employe_model.dart';
-import 'package:rebsspace/core/network/api_client.dart';
 
 class DashboardController extends GetxController {
+  final ApiClient apiClient;
+
+  DashboardController({
+    required this.apiClient,
+  });
+
   final isLoading = true.obs;
   final errorMessage = ''.obs;
   final employee = Rxn<EmployeeModel>();
@@ -16,7 +22,7 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
 
-    _dataSource = EmployeeRemoteDataSource(ApiClient());
+    _dataSource = EmployeeRemoteDataSource(apiClient);
 
     fetchDashboard();
   }
@@ -26,14 +32,12 @@ class DashboardController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // Fetch employee details from API.
       final json = await _dataSource.getEmployee();
 
       final employeeData = EmployeeModel.fromJson(json);
 
       employee.value = employeeData;
 
-      // Save employee details locally.
       await AppDatabase.instance.cacheEmployee({
         'employeeName': employeeData.employeeName,
         'employeeId': employeeData.employeeId,
@@ -41,7 +45,6 @@ class DashboardController extends GetxController {
         'leaveBalance': employeeData.leaveBalance,
       });
     } catch (e) {
-      // If API fails, load employee details from SQLite.
       try {
         final cachedData =
             await AppDatabase.instance.getCachedEmployee();

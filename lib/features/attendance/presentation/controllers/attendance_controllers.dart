@@ -261,7 +261,7 @@ class AttendanceController extends GetxController {
       }
 
       // Create attendance event
-      final timestamp = DateTime.now().toIso8601String();
+      final timestamp = DateTime.now().toUtc().toIso8601String();
 
       final event = AttendanceEventModel(
         eventId: _uuid.v4(),
