@@ -1,10 +1,49 @@
+
 import 'package:flutter/material.dart';
-import 'package:rebsspace/presentation/core/app_colors.dart';
-import 'package:rebsspace/presentation/screens/dashboard.dart';
-import 'package:rebsspace/presentation/screens/leave_screen.dart';
-import 'package:rebsspace/presentation/screens/screen_attendance.dart';
+import 'package:get/get.dart';
+import 'package:rebsspace/core/app_colors.dart';
+import 'package:rebsspace/core/database/app_database.dart';
+import 'package:rebsspace/core/network/api_client.dart';
+import 'package:rebsspace/core/services/location_services.dart';
+import 'package:rebsspace/features/attendance/data/datasource/attendance_remote_datasource.dart';
+import 'package:rebsspace/features/attendance/presentation/controllers/attendance_controllers.dart';
+import 'package:rebsspace/features/dashboard/presentation/dashboard.dart';
+import 'package:rebsspace/features/leave/data/datasources/leave_local_data_source.dart';
+import 'package:rebsspace/features/leave/data/datasources/leave_remote_data_source.dart';
+import 'package:rebsspace/features/leave/presentation/controllers/leave_controller.dart';
+import 'package:rebsspace/features/leave/presentation/leave_screen.dart';
+import 'package:rebsspace/features/attendance/presentation/screen_attendance.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final apiClient = ApiClient();
+
+  Get.put<AttendanceController>(
+    AttendanceController(
+      remoteDataSource: AttendanceRemoteDataSource(apiClient),
+      locationService: LocationService(),
+      database: AppDatabase.instance,
+    ),
+    permanent: true,
+  );
+
+final database = AppDatabase.instance;
+
+
+
+Get.put<LeaveController>(
+  LeaveController(
+    remoteDataSource: LeaveRemoteDataSource(
+      apiClient: apiClient,
+    ),
+    localDataSource: LeaveLocalDataSource(
+      database: database,
+    ),
+  ),
+  permanent: true,
+);
+
   runApp(const MyApp());
 }
 
@@ -13,22 +52,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: RebsHrmsApp(),
-    );
-  }
-}
-
-class RebsHrmsApp extends StatelessWidget {
-  const RebsHrmsApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'REBS HRMS',
       theme: ThemeData(
@@ -60,7 +84,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int selectedIndex = 0;
 
-  final List<Widget> screens = const [
+  final List<Widget> screens =  [
     DashboardScreen(),
     AttendanceScreen(),
     LeaveScreen(),
